@@ -1,0 +1,30 @@
+int c = 0;	//记三个灰度传感器变黑次数
+int x=0;
+int before=0;	//上一状态值
+int button=0;	//现在的值
+
+void jishu()	//记录三个传感器全变黑次数
+{
+  if((sensor[0] == 1) && (sensor[1] == 1) && (sensor[2] == 1))
+  {
+    delay(20);//消抖
+    if((sensor[0] == 1) && (sensor[1] == 1) && (sensor[2] == 1))
+    {
+      x=1;
+     }
+    }
+    else
+    {
+      x=0;
+      }
+   button=x;//储存现在的状态
+   if(button==1 && before==0)
+   {
+      c++;//变化加一
+    }
+   if(button!=before)
+   {
+    delay(20);
+    }
+    before=button;//给前一状态赋值
+}

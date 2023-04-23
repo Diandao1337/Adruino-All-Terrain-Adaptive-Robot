@@ -1,0 +1,70 @@
+int sensor[3] = {0, 0, 0}; //存储A0A2A3
+float max = 3; //误差最大值
+
+void read_sensor_values()//模拟灰度识别
+{
+  sensor[0] = analogRead(A0);//读取模拟量的值
+  sensor[1] = analogRead(A2);
+  sensor[2] = analogRead(A3);
+  if (sensor[0] < 90)//参数根据实际需要量修改
+  {
+    sensor[0] = 1;//转化为数字量
+  }
+  else
+  {
+    sensor[0] = 0;
+  }
+  if (sensor[1] < 90)
+  {
+    sensor[1] = 1;
+  }
+  else
+  {
+    sensor[1] = 0;
+  }
+  if (sensor[2] < 90)
+  {
+    sensor[2] = 1;
+  }
+  else
+  {
+    sensor[2] = 0;
+  }
+
+  if ((sensor[0] == 0) && (sensor[1] == 0) && (sensor[2] == 1))
+  {
+    error = -2;//需要大角度右转修正0 0 1
+  }
+  else if ((sensor[0] == 0) && (sensor[1] == 1) && (sensor[2] == 1))
+  {
+    error = -1;//需要小角度右转修正0 1 1
+  }
+  else if ((sensor[0] == 0) && (sensor[1] == 1) && (sensor[2] == 0))
+  {
+    error = 0;//直行0 1 0
+  }
+  else if ((sensor[0] == 1) && (sensor[1] == 1) && (sensor[2] == 0))
+  {
+    error = 1;//需要小角度左转修正1 1 0
+  }
+  else if ((sensor[0] == 1) && (sensor[1] == 0) && (sensor[2] == 0))
+  {
+    error = 2;//需要大角度左转修正1 0 0
+  }
+  else if ((sensor[0] == 0) && (sensor[1] == 0) && (sensor[2] == 0))//跑上一状态
+  {
+    if (error > 0)//如果前一状态为左转
+    {
+      error = max;//需要原地左转修正
+    }
+    else
+    {
+      error = -max;//需要原地右转修正
+      
+    }
+  }
+  else if ((sensor[0] == 1) && (sensor[1] == 1) && (sensor[2] == 1))
+  {
+       error = 0;//1 1 1直行
+  }
+}

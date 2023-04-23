@@ -1,0 +1,89 @@
+float s = 255;//电机转速范围（-s，s）
+float Kp = 125, Ki = 15, Kd = 60; //PID控制算法
+float error = 0, P = 0, I = 0, D = 0, PID_value = 0;//P比例I积分D微分
+float previous_error = 0, previous_I = 0;//微分和积分常量
+int initial_motor_speed = 255;//电机速度基数
+
+void calculate_pid()//pid算法
+{
+  P = error;
+  I = I + previous_I;
+  D = error - previous_error;
+
+  PID_value = (Kp * P) + (Ki * I) + (Kd * D);//PID算式
+
+  previous_I = I;
+  previous_error = error;
+}
+
+void motor_control()
+{
+  // 计算有效电机转速：
+  int left_motor_speed = initial_motor_speed - PID_value;//左电机速度
+  int right_motor_speed = initial_motor_speed + PID_value;//右电机速度
+
+  left_motor_speed = constrain(left_motor_speed, -s, s);//设定电机转速范围
+  right_motor_speed = constrain(right_motor_speed, -s, s);
+
+   if((error>=-2)&&(error<=2))
+   {
+    run(left_motor_speed, right_motor_speed);//前进与转向
+   }
+   else if(error<-2)
+   {
+      sright(220);//原地右转
+   }
+   else
+   {
+      sleft(220);//原地左转
+   }
+}
+
+void run(float Speed1,float Speed2)//小车行进
+{
+  if(Speed1>0)
+  {
+    analogWrite(9, Speed1); //左电机
+    analogWrite(10, 0);
+  }
+  else
+  {
+    analogWrite(9,0); //左电机
+    analogWrite(10,abs(Speed1) );
+  }
+  if(Speed2>0)
+  {
+    analogWrite(5, Speed2); //右电机
+    analogWrite(6, 0);
+  }
+  else
+  {
+    analogWrite(5, 0); //右电机
+    analogWrite(6, abs(Speed2));
+    }
+}
+
+void stop()   //刹车
+{
+  analogWrite(5,200);
+  analogWrite(6,200);
+  analogWrite(9,200);
+  analogWrite(10,200);
+}
+
+void sleft(float Speed)//原地左转
+{
+
+  analogWrite(9, 0); 
+  analogWrite(10, Speed);
+  analogWrite(5, Speed); 
+  analogWrite(6, 0); 
+}
+
+void sright(float Speed)//原地右转
+{
+  analogWrite(9, Speed);
+  analogWrite(10, 0);
+  analogWrite(5, 0);  
+  analogWrite(6,Speed);
+}

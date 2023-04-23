@@ -1,0 +1,42 @@
+int c = 0;		//记三个灰度传感器变黑次数
+
+int pos = 0;	// 角度存储变量0
+int poss =180;	// 角度存储变量180
+
+int   c_state = 0;	//颜色状态，绿球为0,红色为1,蓝色为2
+
+void yanse()	//颜色识别扎气球
+{
+   int i,j,k;
+  if(c==5)		//三个寻迹传感器全识别到黑
+  {
+    for(i=0;i<20;i++)		//停车检测20次
+    {
+      stop();	//停车
+      delay(10);
+      servo(pos);	//舵机转到颜色识别区域
+      get_color();	//获得颜色
+      h=c_state;	//获取初始颜色
+      Serial.print(h);
+    }
+    for(j=0;j<75;j++)
+    {
+      read_sensor_values();	//寻迹
+      calculate_pid();
+      motor_control();
+      delay(10);
+    }
+    for(k=0;k<3;k++)
+    {
+      judge();	//颜色判断
+      Serial.println(e);
+      if(e==h)
+      {
+        break;
+        }
+      delayTracing(40);
+    }
+    c++;		//跳出本次程序
+    }
+    
+}

@@ -1,0 +1,37 @@
+//颜色识别
+int   c_state = 0;//颜色状态，绿球为0,红色为1,蓝色为2
+
+int   h=0;//颜色储存初状态值
+int   e=0;//颜色储存终状态值
+
+//舵机
+int pos = 0;// 角度存储变量0
+int poss =180;// 角度存储变量180
+
+void judge()//颜色判断
+{
+  int n,m;
+  for(n=0;n<20;n++)
+  {
+    stop();//停车
+    delay(50);
+    get_color();//第二次获得颜色
+    e=c_state;//获取第二次颜色
+    
+  }
+  if(e==h)//如果e存储的颜色与h的相同
+  {
+    for(m=0;m<10;m++)
+    {
+      servo(poss);//舵机转向扎气球
+      delay(10);
+      //break;
+    }
+    for(m=0;m<5;m++)
+    {
+      servo(90);//舵机转向回正
+      delay(10);
+      //break;
+    }
+   }  
+  }

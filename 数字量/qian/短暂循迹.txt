@@ -1,0 +1,11 @@
+void delayTracing(int time)//毫秒,短暂寻迹
+{
+  int m;
+  for(m=0;m<time;m++)
+  {
+      read_sensor_values();//寻迹
+      calculate_pid();
+      motor_control();
+      delay(10);
+   }
+}

@@ -1,0 +1,33 @@
+c_state = 0;//颜色状态，绿球为0,红色为1,蓝色为2
+
+void compare(int letter)//颜色获取比较
+{
+  int d,f,g;
+  d=0;
+  f=0;
+  g=0;
+   if(c_state==0)//绿色
+      {
+        d++;//绿色获取次数
+        }
+    else if(c_state==1)//红色
+        {
+          f++;//红色获取次数
+          }
+    else//蓝色
+      {
+        g++;//蓝色获取次数
+        }
+    if(d>f&&d>g)
+        {
+          c_state=0;
+          }
+    else if(f>d&&f>g)
+      {
+        c_state=1;
+        }
+     else
+       {
+        c_state=2;
+        }
+  }

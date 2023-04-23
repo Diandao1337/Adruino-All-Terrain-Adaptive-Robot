@@ -1,0 +1,16 @@
+int servoPin =12;// 定义Servo对象来控制
+int pos = 0;// 角度存储变量0
+int poss =180;// 角度存储变量180
+
+void servo(int angle)//定义一个舵机控制函数 angle为转动角度 与舵机控制库效果相同
+{
+  for(int i=0;i<50;i++)
+  {
+  int pulsewidth = (angle * 11)+500;
+  digitalWrite(servoPin, HIGH); 
+  delayMicroseconds(pulsewidth);
+  digitalWrite(servoPin, LOW);
+  delayMicroseconds(20000 - pulsewidth);
+  }
+  delay(100);
+}

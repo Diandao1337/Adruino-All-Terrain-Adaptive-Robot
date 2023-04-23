@@ -1,0 +1,124 @@
+#include <Servo.h> 
+#include <FlexiTimer2.h>
+
+//颜色识别 
+#define S0    3         //物体表面的反射光越强，TCS3002D内置振荡器产生的方波频率越高，
+#define S1    4   	//S0和S1的组合决定输出信号频率比例因子，比例因子为2%
+                   	//比率因子为TCS3200传感器OUT引脚输出信号频率与其内置振荡器频率之比
+#define S2     7	//S2和S3的组合决定让红、绿、蓝，哪种光线通过滤波器
+#define S3     8
+#define OUT    2	//颜色传感器输出信号连接到Arduino中断引脚，并引发脉冲信号中断
+#define LED    13	//控制颜色传感器是否点亮LED
+
+int   g_count = 0;	// 计算与反射光强相对应颜色传感器输出信号的脉冲数
+int   g_array[3];	// 数组用于存储在1s内输出信号的脉冲数
+int   g_flag = 0;	// 滤波器模式选择顺序标志
+int   c_state = 0;	//颜色状态，绿球为0,红色为1,蓝色为2
+int   Interrupt_time =20;	//一次识别的时间ms
+int   h=0;		//颜色储存初状态值
+int   e=0;		//颜色储存终状态值
+
+//选择滤波器模式，决定让红、绿、蓝，哪种光线通过滤波器  
+void FilterColor(int Level01, int Level02)  
+{  
+  if(Level01 != 0)  
+    Level01 = HIGH;  
+  if(Level02 != 0)  
+    Level02 = HIGH;  
+  digitalWrite(S2, Level01);  
+  digitalWrite(S3, Level02); 
+  //delay(1000); 
+}  
+
+//中断函数，计算TCS3200输出信号的脉冲数  
+void Count()  
+{  
+  g_count ++ ;
+} 
+void Callback()
+{  
+  switch(g_flag)
+  {  
+    case 0:  
+         Serial.println("正在颜色识别");  
+         WB(LOW, LOW);//选择让红色光线通过滤波器的模式  
+         break;  
+    case 1:  
+         Serial.print("0.3秒内红色脉冲数：");  
+         Serial.println(g_count);//打印红光通过滤波器时，TCS3200输出的脉冲个数  
+         g_array[0] = g_count;//存储红光通过滤波器时，TCS3200输出的脉冲个数  
+         WB(HIGH, HIGH);//选择让绿色光线通过滤波器的模式  
+         break;  
+    case 2:  
+         Serial.print("0.3秒内绿色脉冲数：");  
+         Serial.println(g_count);//打印绿光通过滤波器时，TCS3200输出的脉冲个数  
+         g_array[1] = g_count;//存储绿光通过滤波器时，TCS3200输出的脉冲个数  
+         WB(LOW, HIGH);//选择让蓝色光线通过滤波器的模式  
+         break;  
+   
+    case 3:  
+         Serial.print("0.3秒内蓝色脉冲数");  
+         Serial.println(g_count);//打印蓝光通过滤波器时，TCS3200输出的脉冲个数  
+         Serial.println("颜色识别结束");  
+         g_array[2] = g_count;//存储蓝光通过滤波器时，TCS3200输出的脉冲个数  
+         WB(HIGH, LOW);//选择无滤波器的模式    
+         break;  
+   default:  
+         g_count = 0;//计数值清零  
+         break;  
+  }  
+}  
+
+//设置反射光中红、绿、蓝三色光分别通过滤波器时如何处理数据的标志    
+void WB(int Level0, int Level1)      
+{  
+  g_count = 0;   //计数值清零  
+  g_flag ++;     //输出信号计数标志  
+  FilterColor(Level0, Level1); //滤波器模式  
+}
+
+void get_color()
+{
+  int turns = 1;
+  int red_num =0;
+  int gre_num =0;
+  int blu_num =0;
+  digitalWrite(LED, HIGH);
+  FlexiTimer2::set(Interrupt_time/4,Callback);
+  FlexiTimer2::start();//定时器中断开
+    for(int i =1;i<=turns;i++)
+    {
+      g_flag = 0;  
+      delay(Interrupt_time);//一次识别时间为Interrupt_time
+     if((g_array[0] > g_array[1]) && (g_array[0] > g_array[2]))
+     {
+      red_num++;
+     }
+      else if((g_array[2] > g_array[1]) && (g_array[2] > g_array[0]) )
+     {
+       blu_num++;
+     }
+      else
+     {
+       gre_num++;
+     }
+  }
+ FlexiTimer2::stop();//定时器中断关
+   if(red_num>blu_num && red_num>gre_num)
+   {
+    Serial.println("红色小球 ");
+    c_state = 1;//红球
+   } 
+   else if(blu_num>red_num && blu_num>gre_num)
+   {
+    Serial.println("蓝色小球 ");
+    c_state = 2;//蓝球
+   }
+   else
+   {
+    Serial.println("绿色小球 ");
+    c_state = 0;//绿球
+   }  
+   digitalWrite(LED, LOW);
+}
+

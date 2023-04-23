@@ -1,0 +1,11 @@
+void zhongdiansotp()
+{
+  if(c==7)
+  {
+    delayTracing(250);
+    while(1)
+    {
+      stop();//延迟后刹车
+    }
+    }
+  }
